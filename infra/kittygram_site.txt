@@ -1,4 +1,4 @@
-ip: 158.160.80.251;
+IP: 158.160.80.251;
 name_taski: https://linasplaying.zapto.org/;
 name_kittygram: https://linasgram.zapto.org/;
 login: yc-user;
