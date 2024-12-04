@@ -1,0 +1,101 @@
+server {
+  server_name 158.160.80.251 linasplaying.zapto.org;
+
+  location /api/ {
+        # Эта команда определяет, куда нужно перенаправить запрос.
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+  location /admin/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+
+  location / {
+      # Место, где будет лежать статика и фронт тасков.
+      # Не забудьте про chown, чтобы прав было достаточно.
+     root   /var/www/taski;
+     index  index.html index.htm;
+     try_files $uri /index.html;
+  }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/linasgram.zapto.org/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/linasgram.zapto.org/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    # С любого адреса, лишь бы порт 80 был.
+    server_name linasgram.zapto.org;
+
+    # любой другой запрос передай серверу Gunicorn
+    location /api/ {
+        include proxy_params;
+        # передавать запросы нужно на внутренний IP на порт 8000
+        proxy_pass http://127.0.0.1:8080;
+    }
+
+    # любой другой запрос передай серверу django
+    location /admin/ {
+        include proxy_params;
+        # передавать запросы нужно на внутренний IP на порт 8000
+        proxy_pass http://127.0.0.1:8080;
+    }
+
+    location /media/ {
+        # Т.е. на сервере у нас будет папка /var/www/kittygram/media/
+        # И в ней будут лежать картинки котиков.
+        # final_path = root + location
+        # root /var/www/kittygram;
+        # Т.е. на сервере у нас будет папка /var/www/kittygram/media/
+        # И в ней будут лежать картинки котиков
+        # final_path = alias, и не забываем про слэш в конце!!!
+        root /var/www/kittygram;
+       
+    }
+
+    location / {
+    # Статика будет искаться тут /var/www/kittygram/[static_backend/...]
+            root /var/www/kittygram;
+            index index.html index.htm;
+            try_files $uri /index.html;
+    }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/linasgram.zapto.org/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/linasgram.zapto.org/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+
+
+server {
+    if ($host = linasgram.zapto.org) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name linasgram.zapto.org;
+    return 404; # managed by Certbot
+
+
+}server {
+    if ($host = linasplaying.zapto.org) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+  server_name 158.160.80.251 linasplaying.zapto.org;
+    listen 80;
+    return 404; # managed by Certbot
+
+
+}

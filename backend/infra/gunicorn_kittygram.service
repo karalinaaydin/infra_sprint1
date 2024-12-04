@@ -1,0 +1,11 @@
+[Unit]
+Description=gunicorn kittygram daemon
+After=network.target
+[Service]
+User=root
+# Рабочая директория, где лежит код проекта.
+WorkingDirectory=/home/yc-user/infra_sprint1/backend/
+# Путь в созданном вирт. окружении до файла gunicorn
+ExecStart=/home/yc-user/infra_sprint1/venv/bin/gunicorn --bind 0:8080 kittygram_backend.wsgi
+[Install]
+WantedBy=multi-user.target
